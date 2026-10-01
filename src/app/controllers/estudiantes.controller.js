@@ -1,6 +1,12 @@
 //Acceso a Estudiantes services
 const estudiantesService = require ("../services/estudiantes.service");
 
+
+// La declaración async function crea un enlace de una nueva función asíncrona a un nombre dado.
+// La palabra clave await está permitida dentro del cuerpo de la función, lo que permite escribir 
+// un comportamiento asíncrono basado en promesas de un estilo más limpio y evitar la necesidad 
+// de configurar explícitamente cadenas de promesas.
+
 const obtenerEstudiantes = async (req, res) => {
     try {
         const estudiantes =
@@ -15,72 +21,90 @@ const obtenerEstudiantes = async (req, res) => {
 };
 
 
-const obtenerEstudiantesPorId = (req, res) => {
-    const id = Number (req.params.id);
+const obtenerEstudiantesPorId = async (req, res) => {
+  try{
 
-    const estudiante = estudiantesService.obtenerPorId(id);
+    const {id} = req.params;
 
-    if(!estudiante) {
-        return res.status (404).json({
-            error: "Estudiante no encontrado"
-        });
-    }
+    const estudiante =
+        await estudiantesService.obtenerPorId(id);
 
-    res.json(estudiante);
+    res.status(200).json(estudiante);
+
+  }catch (error){
+
+    console.error(error);
+
+    res.status(404).json({
+        error: "Estudiante no encontrado"
+    });
+  }
 };
 
-const crearEstudiante = (req, res) => {
-    const {nombre, correo, edad} = req.body;
+const crearEstudiante = async (req, res) => {
 
-    if(!nombre || !correo || !edad) {
-        return res.status(400).json({
-            error: "Todos los campos son obligatorios"
+    try{
+
+        const estudiante =
+         await estudiantesService.crear(req.body);
+
+        res.status(201).json(estudiante);
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error al crear estudiante"
         });
     }
-
-    const nuevoEstudiante = estudiantesService.crear({
-        nombre,
-        correo,
-        edad
-    });
-
-    res.status(201).json(nuevoEstudiante);
 };
 
-const actualizarEstudiante = (req, res) => {
-    const id = Number (req.params.id);
+const actualizarEstudiante = async (req, res) => {
 
-    const datos = req.body;
+    try{
 
-    const estudianteActualizado = estudiantesService.actualizar(id, datos);
+        const {id} = req.params;
 
-    if (!estudianteActualizado) {
-        return res.status (404).json({
-            error: "Estudiante no encontrado"
+        const estudiante =
+            await estudiantesService.actualizar(
+                id,
+                req.body
+            );
+
+        res.status(200).json(estudiante);
+
+    }catch (error){
+
+        console.error (error);
+
+        res.status(500).json({
+            error: "Error al actualizar estudiante"
         });
     }
-
-    res.status (200).json({
-        mensaje: "Estudiante Actualizado Correctamente",
-        estudiante: estudianteActualizado
-    });
 }; 
 
-const eliminarEstudiante = (req, res) => {
-    const id = Number (req.params.id);
+const eliminarEstudiante = async (req, res) => {
+    
+    try{
 
-    const estudianteEliminado = estudiantesService.eliminar(id);
+        const {id} = req.params;
 
-    if (!estudianteEliminado) {
-        return res.status(404).json({
-            error: "Estudiante no encontrado"
+        const estudiante =
+            await estudiantesService.eliminar(id);
+            
+            res.status(200).json({
+                mensaje: "Estudiante Eliminado",
+                estudiante
+            });
+            
+    }catch (error){
+
+        console.error (error);
+
+        res.status(500).json({
+            error: "Error al eliminar estudiante"
         });
     }
-
-    res.status(200).json({
-        mensaje: "Estudiante eliminado correctamente",
-        estudiante: estudianteEliminado
-    });
 };
 
 module.exports = {
