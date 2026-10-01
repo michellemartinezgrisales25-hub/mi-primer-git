@@ -1,12 +1,19 @@
 //Acceso a Estudiantes services
 const estudiantesService = require ("../services/estudiantes.service");
 
+const obtenerEstudiantes = async (req, res) => {
+    try {
+        const estudiantes =
+         await estudiantesService.obtenerTodos();
 
-const obtenerEstudiantes = (req, res) => {
-    const estudiantes = estudiantesService.obtenerTodos();
-
-    res.json(estudiantes);
+        res.status(200).json(estudiantes);
+    } catch (error){
+        res.status(500).json({
+            error: "Error al obtener estudiantes"
+        });
+    }
 };
+
 
 const obtenerEstudiantesPorId = (req, res) => {
     const id = Number (req.params.id);
