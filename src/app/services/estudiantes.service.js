@@ -1,21 +1,32 @@
-//arreglo en memoria. Esto significa que todavía no estamos usando una base de datos.
-let estudiantes = [
-    {
-     id: 1,
-     nombre: "Michelle",
-     correo: "michelle@gmail.com",
-     edad: 25
-    }
-];
+const supabase = require("../config/supabaseAdmin");
 
 //Esta función devuelve todos los estudiantes.
-const obtenerTodos = () => {
-    return estudiantes;
+const obtenerTodos = async () => {
+    const { data, error } = await supabase
+        .from('estudiantes')
+        .select('*');
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
 };
 
 //Busca un estudiante por su identificador.
-const obtenerPorId = (id) => {
-    return estudiantes.find ((estudiante) => estudiante.id === id)
+const obtenerPorId = async (id) => {
+    
+    const { data, error } = await supabase
+        .from("estudiantes")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
 };
 
 /* NOTA:
@@ -25,53 +36,51 @@ Los tres signos === (Igualdad estricta) -> Sirve para comparar el valor y el tip
 */
 
 //Crea un nuevo estudiante copiando los datos recibidos.
-const crear = (datos) => {
-    const nuevoEstudiante = {
-        id: estudiantes.length + 1,
-        ...datos
-    };
+const crear = async (estudiante) => {
 
-    estudiantes.push (nuevoEstudiante);
+    const { data, error } = await supabase
+        .from("estudiantes")
+        .insert(estudiante)
+        .select()
+        .single();
 
-    return nuevoEstudiante;
-};
-
-const actualizar = (id, datos) => {
-
-    //Buscamos la posición del estudiante.
-    const indice = estudiantes.findIndex (
-        (estudiante) => estudiante.id === id
-    );
-
-    if (indice === -1){
-        return null;
+    if(error) {
+        throw error;
     }
 
-    estudiantes [indice] = {
-        ...estudiantes[indice],
-        ...datos,
-        id
-    };
-
-    return estudiantes [indice];
+    return data;
 };
 
-const eliminar = (id) => {
-    const indice = estudiantes.findIndex(
-        (estudiante) => estudiante.id === id
-    );
+const actualizar = async (id, estudiante) => {
 
-    if (indice === -1){
-        return null;
+    const { data, error } = await supabase
+        .from("estudiantes")
+        .update(estudiante)
+        .eq("id", id)
+        .select()
+        .single();
+    
+    if(error){
+        throw error;
     }
 
-    const estudianteEliminado = estudiantes[indice];
+    return data;
+};
 
-    //Eliminar un elemento del arreglo comenzando 
-    // desde determinada posición.
-    estudiantes.splice (indice, 1);
+const eliminar = async (id) => {
+    
+    const { data, error }  = await supabase
+        .from("estudiantes")
+        .delete()
+        .eq("id", id)
+        .select()
+        .single();
 
-    return estudianteEliminado
+    if (error){
+        throw error;
+    }
+
+    return data;
 };
 
 
